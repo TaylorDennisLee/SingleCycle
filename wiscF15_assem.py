@@ -62,7 +62,6 @@ def hex_to_bin(hex_value, bits):
     sign = binary_rep[0]
     return (bits - binary_length)*sign+binary_rep
 
-def signed_int_to_bin(signed_int,bits):
 
 
 
@@ -84,20 +83,57 @@ def assemble(assembly_line, index, jump_dic):
         return iDict[al[0]] + '0000' + '1111' + '0000'
     elif al[0] in ['HLT']:
         return iDict[al[0]] + '0000' + '0000' + '0000'
-
+    else:
+        print 'Instruction not found; Check Parsing and Case Sensitivity'
 
 
 if __name__=='__main__':
     jump_dic = {}
     input_file = open(sys.argv[1]).read().split('\n')
+    for i in input_file:
+        print i
+
+    ## Remove Blank Lines
+    #input_file = filter(None, input_file)
+    #print input_file
+    #tl = lambda x: re.match('^[\t\r]*$',x) == None
+    #input_file = filter(tl, input_file)
+    input_file = filter(lambda x: re.match('^#+|^[\t\r]*$',x) == None, input_file)
+    print 'Scrubbed input_file'
     print input_file
-    input_file = filter(None, input_file)
-    for line in input_file:
-        print line
-        if line[0] == '#':
-            input_file.remove(line)
+    ## Remove Comment Line
+    new_input_file = []
     for index, line in enumerate(input_file):
+        print str(index) +  ': ' + line
+        if line[0] == '#':
+            print 'Line to go: ' + line
+            print 'Line Removed!'
+        else:
+            new_input_file.append(line)
+    print 'IS IT TRUE??'
+    print new_input_file == input_file
+    print 'Jump Dictionary Locations:'
+    for index, line in enumerate(new_input_file):
         if ':' in line:
             jump_dic[re.split(':',line)[0]] =  index
-            print str(index) + ': ' + re.split(':',line)[0]
-        
+            print str(index) + ': ' + re.split('\s:',line)[0]
+    print 'All Assembly Code:'
+    for index, line in enumerate(new_input_file):
+        if ':' in line:
+            print 'C' + str(index) + ': ' +  str(re.split('[:#]+',line))
+        else:
+            print str(index) + ': ' +  str(re.split('[\s]+',line))
+    print 'With Blank Spaces Removed:'
+    for index, line in enumerate(new_input_file):
+        print str(index) + ': ' + str(filter(None,re.split('^.*:\s*|^\s*|\s*#.*$|\s*$',line)))
+
+#    for index, line in enumerate(new_input_file):
+#        if ':' in line:
+#            print 'C' + str(index) + ': ' + str(filter(None,re.split('^.*:\s*|^\s*|[\t\s\r]*$|',line)))
+#        else:
+#            print str(index) + ': ' +       str(filter(None,re.split('^.*:\s*|^\s*|[\t\s]*#?.*$',line)))
+#    for index, line in enumerate(input_file):
+#        if ':' in line:
+#            print 'C' + str(index) + ': ' + str(filter(None,re.split(': +|[\t\r:#]+',line))[1])
+#        else:
+#            print str(index) + ': ' + str(filter(None,re.split('[\t\r:#]+',line))[0])
