@@ -1,0 +1,14 @@
+llb R14, 0x00		#R14 <= 0x0000
+llb R1, 0x06		#R1 <= 0x0006
+
+add R4, R1, R1 		#R4 <= 0x000C 					//Forwarding R1 from llb
+sub R4, R1, R1 		#R4 <= 0x0000 					//Forwarding R1 from llb
+add R2, R1, R4 		#R2 <= 0x0006 					//Forwarding R1 from sub and R4 from sub
+add R2, R2, R2		#R2 <= 0x000C					//Forwarding R2 from add
+sub R1, R1, R1		#R1 <= 0x0000
+sw R1, R14, 0x1 	#mem[1] <= 0x0000 				//Forwarding R1 from sub
+lw R2, R14, 0x1		#R2 <= mem[1] == 0x0000 			//No forwarding needed
+sw R2, R14, 0x7 	#mem[7] <= 0x0000				//Load word stall and forwarding
+lw R3, R14, 0x7		#R3 <= mem[7] == 0x0000				//forwarding from sw
+
+hlt
