@@ -4,7 +4,6 @@
 
 import re
 import sys
-import binascii
 
 iDict = 
 {
@@ -61,7 +60,11 @@ cDict =
 
 
 def hex_to_bin(hex_value, bits):
-    return bin(int(hex_value,16))[2:]
+    binary_rep = bin(int(hex_value,16))[2:]
+    binary_length = len(binary_rep)
+    sign = binary_rep[0]
+    return (bits - binary_length)*sign+binary_rep
+
 
 def assemble(assembly_line):
     al = filter(None,re.split('[\s,]+',cool))
@@ -73,5 +76,15 @@ def assemble(assembly_line):
         return iDict[al[0]] + rDict[al[1]] + rDict[al[2]] + hex_to_bin(al[3], 4)
     elif al[0] in ['LHB', 'LLB']:
         return iDict[al[0]] + rDict[al[1]] + hex_to_bin(al[2],8)
-    elif al[0] in ['B', 'CALL', 'RET', 'HLT']:
+    elif al[0] in ['B']:
+        return iDict[al[0]] + cDict[al[1]] + hex_to_bin(al[2],9)
+    elif al[0] in ['CALL']:
+        return iDict[al[0]] + hex_to_bin(al[2],12)
+    elif al[0] in ['RET']:
+        return iDict[al[0]] + '0000' + '1111' + '0000'
+    elif al[0] in ['HLT']:
+        return iDict[al[0]] + '0000' + '0000' + '0000'
 
+
+def loadToMemory(filename):
+    f = open(filename).read()
