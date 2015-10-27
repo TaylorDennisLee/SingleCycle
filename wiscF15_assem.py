@@ -5,8 +5,7 @@
 import re
 import sys
 
-iDict = 
-{
+iDict = {
     'ADD'    :'0000',
     'PADDSB' :'0001',
     'SUB'    :'0010',
@@ -25,8 +24,7 @@ iDict =
     'HLT'    :'1111'
 }
 
-rDict = 
-{
+rDict = {
     'R0' : '0000',
     'R1' : '0001',
     'R2' : '0010',
@@ -46,8 +44,7 @@ rDict =
 }
 
 
-cDict =
-{
+cDict = {
     'EQ'    :'001',
     'NEQ'   :'000',
     'GT'    :'010',
@@ -65,9 +62,12 @@ def hex_to_bin(hex_value, bits):
     sign = binary_rep[0]
     return (bits - binary_length)*sign+binary_rep
 
+def signed_int_to_bin(signed_int,bits):
 
-def assemble(assembly_line):
-    al = filter(None,re.split('[\s,]+',cool))
+
+
+def assemble(assembly_line, index, jump_dic):
+    al = filter(None,re.split('[\s,]+', assembly_line))
     if al[0] in ['ADD','PADDSB','SUB','NAND','XOR']:
         return iDict[al[0]] + rDict[al[1]] + rDict[al[2]] + rDict[al[3]]
     elif al[0] in ['SLL', 'SRL', 'SRA']:
@@ -77,14 +77,27 @@ def assemble(assembly_line):
     elif al[0] in ['LHB', 'LLB']:
         return iDict[al[0]] + rDict[al[1]] + hex_to_bin(al[2],8)
     elif al[0] in ['B']:
-        return iDict[al[0]] + cDict[al[1]] + hex_to_bin(al[2],9)
+        return iDict[al[0]] + cDict[al[1]] + bin((jump_dic[al[1]] - index - 1)  & int('0b' + '1' * 9, 2))
     elif al[0] in ['CALL']:
-        return iDict[al[0]] + hex_to_bin(al[2],12)
+        return iDict[al[0]] + bin((jump_dic[al[1]] - index - 1)  & int('0b' + '1' * 12, 2))
     elif al[0] in ['RET']:
         return iDict[al[0]] + '0000' + '1111' + '0000'
     elif al[0] in ['HLT']:
         return iDict[al[0]] + '0000' + '0000' + '0000'
 
 
-def loadToMemory(filename):
-    f = open(filename).read()
+
+if __name__=='__main__':
+    jump_dic = {}
+    input_file = open(sys.argv[1]).read().split('\n')
+    print input_file
+    input_file = filter(None, input_file)
+    for line in input_file:
+        print line
+        if line[0] == '#':
+            input_file.remove(line)
+    for index, line in enumerate(input_file):
+        if ':' in line:
+            jump_dic[re.split(':',line)[0]] =  index
+            print str(index) + ': ' + re.split(':',line)[0]
+        
